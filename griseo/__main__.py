@@ -17,5 +17,9 @@ import os
 import dotenv
 import openai
 
-dotenv.load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+import griseo
+
+if __name__ == '__main__':
+    dotenv.load_dotenv()
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    griseo.griseo()
