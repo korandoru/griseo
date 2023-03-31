@@ -58,3 +58,12 @@ def chat():
 
 griseo.add_command(tell)
 griseo.add_command(chat)
+
+
+def main():
+    import dotenv
+    import os
+
+    dotenv.load_dotenv()
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    griseo()

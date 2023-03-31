@@ -12,14 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
-import dotenv
-import openai
-
 import griseo
 
 if __name__ == '__main__':
-    dotenv.load_dotenv()
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    griseo.griseo()
+    griseo.main()
