@@ -65,5 +65,10 @@ def main():
     import os
 
     dotenv.load_dotenv()
-    openai.api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise Exception(
+            "No API key provided. You can configure your API key by `export OPENAI_API_KEY=<API-KEY>`"
+            " or `echo OPENAI_API_KEY=<API-KEY> >> .env`.")
+    openai.api_key = api_key
     griseo()
