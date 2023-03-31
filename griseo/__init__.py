@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import code
+import sys
+import textwrap
 
 import click
 import openai
@@ -53,7 +55,15 @@ def chat():
             self._messages = []
 
     ctx = Context()
-    code.interact(local=locals())
+    banner = textwrap.dedent(f"""\
+    Python {sys.version} on {sys.platform}
+    'Type "help", "copyright", "credits" or "license" for more information.'
+    
+    Welcome to chat with Griseo! You can use:
+    * ctx.tell("...") to interact
+    * ctx.clear()     to reset the conversation.
+    """)
+    code.interact(banner=banner, local=locals())
 
 
 griseo.add_command(tell)
