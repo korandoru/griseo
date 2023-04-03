@@ -31,9 +31,13 @@ def tell(words):
     content = ' '.join(words)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": content}])
-    resp = response["choices"][0]["message"]
-    print(resp["content"])
+        messages=[{"role": "user", "content": content}],
+        stream=True)
+    for chunk in response:
+        delta = chunk['choices'][0]['delta']
+        if delta.get('content'):
+            print(delta['content'], end='', flush=True)
+    print()
 
 
 @click.command()
