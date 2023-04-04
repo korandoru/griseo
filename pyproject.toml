@@ -14,7 +14,7 @@
 
 [tool.poetry]
 name = "griseo"
-version = "0.4.0"
+version = "0.5.0"
 description = "Chat with OpenAI in the Hacker way."
 authors = ["tison <wander4096@gmail.com>"]
 license = "Apache-2.0"
@@ -26,7 +26,7 @@ keywords = ["chatgpt", "cli", "openai"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-openai = "^0.27.2"
+openai = "^0.27.3"
 python-dotenv = "^1.0.0"
 click = "^8.1.3"
 

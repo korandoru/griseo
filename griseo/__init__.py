@@ -12,12 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import code
 import sys
-import textwrap
 
 import click
 import openai
+
+
+def spin(response) -> (str, str):
+    role, content = '', ''
+    for chunk in response:
+        delta = chunk['choices'][0]['delta']
+        if delta.get('role'):
+            role = delta['role']
+            print(f"{delta['role']} >> ", end='', flush=True)
+        if delta.get('content'):
+            content += delta['content']
+            print(delta['content'], end='', flush=True)
+    print()
+    return role, content
 
 
 @click.group()
@@ -33,11 +45,7 @@ def tell(words):
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": content}],
         stream=True)
-    for chunk in response:
-        delta = chunk['choices'][0]['delta']
-        if delta.get('content'):
-            print(delta['content'], end='', flush=True)
-    print()
+    spin(response)
 
 
 @click.command()
@@ -50,24 +58,30 @@ def chat():
 
         def tell(self, msg):
             self._messages.append({"role": "user", "content": msg})
-            response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self._messages)
-            resp = response["choices"][0]["message"]
-            self._messages.append({"role": resp["role"], "content": resp["content"]})
-            print(resp["content"])
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=self._messages,
+                stream=True)
+            role, content = spin(response)
+            self._messages.append({"role": role, "content": content})
 
         def clear(self):
             self._messages = []
 
     ctx = Context()
-    banner = textwrap.dedent(f"""\
-    Python {sys.version} on {sys.platform}
-    'Type "help", "copyright", "credits" or "license" for more information.'
-    
-    Welcome to chat with Griseo! You can use:
-    * ctx.tell("...") to interact
-    * ctx.clear()     to reset the conversation.
-    """)
-    code.interact(banner=banner, local=locals())
+
+    commands = {
+        'c': lambda: ctx.clear(),
+        'clear': lambda: ctx.clear(),
+        'q': lambda: sys.exit(0),
+        'quit': lambda: sys.exit(0),
+    }
+
+    while True:
+        req = input('user << ').strip()
+        if req.startswith(':'):
+            commands[req[1:]]()
+        ctx.tell(req)
 
 
 griseo.add_command(tell)
