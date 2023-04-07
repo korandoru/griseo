@@ -73,6 +73,7 @@ def chat():
         req = input('user << ').strip()
         if req.startswith(':'):
             commands[req[1:]]()
+            continue
         ctx.tell(req)
 
 
