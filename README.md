@@ -12,6 +12,6 @@ pip install griseo
 
 ```shell
 export OPENAI_API_KEY=<API_TOKEN> # or echo OPENAI_API_KEY=<API_TOKEN> >> .env
-griseo tell ... # one-shot chat completion
-griseo chat     # open an interactive session  
+griseo ... # one-shot chat completion
+griseo     # open an interactive session  
 ```

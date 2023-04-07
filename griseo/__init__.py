@@ -13,16 +13,16 @@
 # limitations under the License.
 
 import sys
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, REMAINDER
 
-import click
 import openai
 
 
-def spin(response) -> (str, str):
+def spin(response, print_role) -> (str, str):
     role, content = '', ''
     for chunk in response:
         delta = chunk['choices'][0]['delta']
-        if delta.get('role'):
+        if delta.get('role') and print_role:
             role = delta['role']
             print(f"{delta['role']} >> ", end='', flush=True)
         if delta.get('content'):
@@ -32,23 +32,15 @@ def spin(response) -> (str, str):
     return role, content
 
 
-@click.group()
-def griseo():
-    pass
-
-
-@click.command()
-@click.argument('words', nargs=-1)
-def tell(words):
+def oneshot(words):
     content = ' '.join(words)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": content}],
         stream=True)
-    spin(response)
+    spin(response, print_role=False)
 
 
-@click.command()
 def chat():
     class Context:
         def __init__(self):
@@ -62,7 +54,7 @@ def chat():
                 model="gpt-3.5-turbo",
                 messages=self._messages,
                 stream=True)
-            role, content = spin(response)
+            role, content = spin(response, print_role=True)
             self._messages.append({"role": role, "content": content})
 
         def clear(self):
@@ -84,10 +76,6 @@ def chat():
         ctx.tell(req)
 
 
-griseo.add_command(tell)
-griseo.add_command(chat)
-
-
 def main():
     import dotenv
     import os
@@ -99,4 +87,12 @@ def main():
             "No API key provided. You can configure your API key by `export OPENAI_API_KEY=<API-KEY>`"
             " or `echo OPENAI_API_KEY=<API-KEY> >> .env`.")
     openai.api_key = api_key
-    griseo()
+
+    griseo = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    griseo.add_argument('words', nargs=REMAINDER)
+
+    args = griseo.parse_args()
+    if len(args.words) != 0:
+        oneshot(args.words)
+    else:
+        chat()
