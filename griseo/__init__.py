@@ -14,8 +14,12 @@
 
 import sys
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, REMAINDER
+from importlib import metadata
 
 import openai
+
+__version__ = metadata.version(__package__)
+del metadata  # avoids polluting the results of dir(__package__)
 
 
 def spin(response, print_role) -> (str, str):
@@ -91,6 +95,7 @@ def main():
 
     griseo = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     griseo.add_argument('words', nargs=REMAINDER)
+    griseo.add_argument('-v', '--version', action='version', version=__version__)
 
     args = griseo.parse_args()
     if len(args.words) != 0:
