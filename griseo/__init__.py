@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import sys
+import textwrap
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, REMAINDER
 from importlib import metadata
 
@@ -72,6 +73,13 @@ def chat():
         'q': lambda: sys.exit(0),
         'quit': lambda: sys.exit(0),
     }
+
+    print(textwrap.dedent(f"""\
+    Welcome to chat with Griseo!
+
+    type :c or :clear to clear context
+    type :q or :quit  to exit
+    """))
 
     while True:
         req = input('user << ').strip()
