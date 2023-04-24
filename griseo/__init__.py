@@ -78,7 +78,9 @@ def chat():
         if req.startswith(':'):
             commands[req[1:]]()
             continue
-        ctx.tell(req)
+
+        if len(req) > 0:  # skip empty input
+            ctx.tell(req)
 
 
 def main():
