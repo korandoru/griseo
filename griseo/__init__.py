@@ -98,7 +98,12 @@ def chat():
     """))
 
     while True:
-        req = input('user << ').strip()
+        try:
+            req = input('user << ').strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
         if req.startswith(':'):
             commands[req[1:]]()
             continue
