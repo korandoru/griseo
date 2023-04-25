@@ -18,6 +18,12 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, REMAINDER
 from importlib import metadata
 
 import openai
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+    retry_if_exception_type,
+)  # for exponential backoff
 
 __version__ = metadata.version(__package__)
 del metadata  # avoids polluting the results of dir(__package__)
@@ -37,9 +43,18 @@ def spin(response, print_role) -> (str, str):
     return role, content
 
 
+@retry(
+    wait=wait_random_exponential(min=1, max=60),
+    stop=stop_after_attempt(3),
+    retry=retry_if_exception_type(openai.error.RateLimitError),
+    reraise=True)
+def completions_with_backoff(**kwargs):
+    return openai.ChatCompletion.create(**kwargs)
+
+
 def oneshot(words):
     content = ' '.join(words)
-    response = openai.ChatCompletion.create(
+    response = completions_with_backoff(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": content}],
         stream=True)
@@ -54,12 +69,13 @@ def chat():
             ]
 
         def tell(self, msg):
-            self._messages.append({"role": "user", "content": msg})
-            response = openai.ChatCompletion.create(
+            messages = self._messages + [{"role": "user", "content": msg}]
+            response = completions_with_backoff(
                 model="gpt-3.5-turbo",
-                messages=self._messages,
+                messages=messages,
                 stream=True)
             role, content = spin(response, print_role=True)
+            self._messages.append({"role": "user", "content": msg})
             self._messages.append({"role": role, "content": content})
 
         def clear(self):
@@ -88,7 +104,10 @@ def chat():
             continue
 
         if len(req) > 0:  # skip empty input
-            ctx.tell(req)
+            try:
+                ctx.tell(req)
+            except openai.error.RateLimitError as e:
+                print(e.user_message)
 
 
 def main():
