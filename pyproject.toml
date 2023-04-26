@@ -14,7 +14,7 @@
 
 [tool.poetry]
 name = "griseo"
-version = "0.9.0"
+version = "0.10.0"
 description = "Chat with OpenAI in the Hacker way."
 authors = ["tison <wander4096@gmail.com>"]
 license = "Apache-2.0"
