@@ -122,6 +122,8 @@ def chat():
                 ctx.tell(req)
             except openai.error.RateLimitError as e:
                 print(e.user_message)
+            except openai.error.InvalidRequestError as e:
+                print(e.user_message)
 
 
 def main():
