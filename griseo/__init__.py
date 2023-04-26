@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import logging
 import sys
 import textwrap
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, REMAINDER
@@ -88,14 +88,20 @@ def chat():
         'clear': lambda: ctx.clear(),
         'q': lambda: sys.exit(0),
         'quit': lambda: sys.exit(0),
+        'h': lambda: print(usage),
+        'help': lambda: print(usage),
     }
 
-    print(textwrap.dedent(f"""\
-    Welcome to chat with Griseo!
+    usage = textwrap.dedent("""
+    :c, :clear            clear chat context
+    :h, :help             show this help message
+    :q, :quit             exit the conversation
+    """)
 
-    type :c or :clear to clear context
-    type :q or :quit  to exit
-    """))
+    print(f"Welcome to chat with Griseo!\n{usage}")
+
+    logging.basicConfig(stream=sys.stderr, format="[%(levelname)s] %(message)s")
+    logger = logging.getLogger()
 
     while True:
         try:
@@ -105,7 +111,10 @@ def chat():
             break
 
         if req.startswith(':'):
-            commands[req[1:]]()
+            if req[1:] in commands:
+                commands[req[1:]]()
+            else:
+                logger.warning(f"unknown command {req}\n{usage}")
             continue
 
         if len(req) > 0:  # skip empty input
