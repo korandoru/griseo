@@ -24,6 +24,8 @@ repository = "https://github.com/korandoru/griseo"
 documentation = "https://github.com/korandoru/griseo"
 keywords = ["chatgpt", "cli", "openai"]
 
+include = ["griseo/prompts/*.csv"]
+
 [tool.poetry.dependencies]
 python = "^3.8"
 openai = "^0.27.4"
