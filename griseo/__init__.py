@@ -27,6 +27,7 @@ from tenacity import (
 )  # for exponential backoff
 
 __version__ = metadata.version(__package__)
+
 del metadata  # avoids polluting the results of dir(__package__)
 
 
@@ -54,22 +55,26 @@ def completions_with_backoff(**kwargs):
 
 
 class Context:
-    def __init__(self):
-        self._messages = [
-            {"role": "system", "content": "You are a helpful assistant."}
-        ]
 
-    def tell(self, msg):
+    def __init__(self, file):
+        self._messages = []
+        self._prompts = []
+        self.reset(file)
+
+    def tell(self, msg, print_role):
         self._messages.append({"role": "user", "content": msg})
         response = completions_with_backoff(
             model="gpt-3.5-turbo",
             messages=self._messages,
             stream=True)
-        role, content = spin(response, print_role=True)
+        role, content = spin(response, print_role)
         self._messages.append({"role": role, "content": content})
 
-    def clear(self):
-        self._messages = []
+    def reset(self, file=None):
+        if file is not None:
+            from griseo import prompts
+            self._prompts = prompts.load(file)
+        self._messages = self._prompts
 
 
 def main():
@@ -86,21 +91,21 @@ def main():
 
     griseo = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     griseo.add_argument('words', nargs=REMAINDER)
-    griseo.add_argument('-v', '--version', action='version', version=__version__)
+    griseo.add_argument('-v', '--version', action='version', version=__version__, help='show version')
+    griseo.add_argument('-p', '--prompt', metavar='FILE', default='default.csv', help='prompts file')
 
     args = griseo.parse_args()
-
-    ctx = Context()
+    ctx = Context(args.prompt)
 
     # oneshot
     if len(args.words) > 0:
-        ctx.tell(' '.join(args.words))
+        ctx.tell(' '.join(args.words), print_role=False)
         return
 
     # interactive
     commands = {
-            'c': lambda: ctx.clear(),
-            'clear': lambda: ctx.clear(),
+            'r': lambda: ctx.reset(),
+            'reset': lambda: ctx.reset(),
             'q': lambda: sys.exit(0),
             'quit': lambda: sys.exit(0),
             'h': lambda: print(usage),
@@ -108,7 +113,7 @@ def main():
     }
 
     usage = textwrap.dedent("""
-    :c, :clear            clear chat context
+    :c, :clear            reset chat context
     :h, :help             show this help message
     :q, :quit             exit the conversation
     """)
@@ -134,7 +139,7 @@ def main():
 
         if len(req) > 0:  # skip empty input
             try:
-                ctx.tell(req)
+                ctx.tell(req, print_role=True)
             except openai.error.RateLimitError as e:
                 print(e.user_message)
             except openai.error.InvalidRequestError as e:
