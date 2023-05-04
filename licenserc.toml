@@ -1,4 +1,4 @@
-# Copyright 2023 tison <wander4096@gmail.com>
+# Copyright 2023 Korandoru Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,4 +16,4 @@ headerPath = "Apache-2.0.txt"
 
 [properties]
 inceptionYear = 2023
-copyrightOwner = "tison <wander4096@gmail.com>"
+copyrightOwner = "Korandoru Contributors"
