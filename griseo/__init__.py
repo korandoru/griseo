@@ -92,7 +92,7 @@ def main():
     griseo = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     griseo.add_argument('words', nargs=REMAINDER)
     griseo.add_argument('-v', '--version', action='version', version=__version__, help='show version')
-    griseo.add_argument('-p', '--prompt', metavar='FILE', default='default.csv', help='prompts file')
+    griseo.add_argument('-p', '--prompt', metavar='FILE', default='default.jsonl', help='prompts file')
 
     args = griseo.parse_args()
     ctx = Context(args.prompt)

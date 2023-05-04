@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import csv
 import importlib.resources
+import json
 from pathlib import Path
 
 
@@ -22,14 +22,12 @@ def load(prompt: str):
     p = importlib.resources.files(__package__).joinpath(prompt)
     if p.is_file():
         with p.open() as f:
-            reader = csv.DictReader(f, fieldnames=['role', 'content'])
-            return [row for row in reader]
+            return [json.loads(line) for line in f.readlines()]
 
     # 2. try resolve path
     p = Path(prompt)
     if p.is_file():
         with p.open() as f:
-            reader = csv.DictReader(f, fieldnames=['role', 'content'])
-            return [row for row in reader]
+            return [json.loads(line) for line in f.readlines()]
 
     raise RuntimeError(f"{p} cannot be resolved")

@@ -14,7 +14,7 @@
 
 [tool.poetry]
 name = "griseo"
-version = "0.11.0"
+version = "0.12.0"
 description = "Chat with OpenAI in the Hacker way."
 authors = ["tison <wander4096@gmail.com>"]
 license = "Apache-2.0"
@@ -24,7 +24,7 @@ repository = "https://github.com/korandoru/griseo"
 documentation = "https://github.com/korandoru/griseo"
 keywords = ["chatgpt", "cli", "openai"]
 
-include = ["griseo/prompts/*.csv"]
+include = ["griseo/prompts/*.jsonl"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
