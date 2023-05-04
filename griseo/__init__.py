@@ -53,44 +53,58 @@ def completions_with_backoff(**kwargs):
     return openai.ChatCompletion.create(**kwargs)
 
 
-def oneshot(words):
-    content = ' '.join(words)
-    response = completions_with_backoff(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": content}],
-        stream=True)
-    spin(response, print_role=False)
+class Context:
+    def __init__(self):
+        self._messages = [
+            {"role": "system", "content": "You are a helpful assistant."}
+        ]
+
+    def tell(self, msg):
+        self._messages.append({"role": "user", "content": msg})
+        response = completions_with_backoff(
+            model="gpt-3.5-turbo",
+            messages=self._messages,
+            stream=True)
+        role, content = spin(response, print_role=True)
+        self._messages.append({"role": role, "content": content})
+
+    def clear(self):
+        self._messages = []
 
 
-def chat():
-    class Context:
-        def __init__(self):
-            self._messages = [
-                {"role": "system", "content": "You are a helpful assistant."}
-            ]
+def main():
+    import dotenv
+    import os
 
-        def tell(self, msg):
-            messages = self._messages + [{"role": "user", "content": msg}]
-            response = completions_with_backoff(
-                model="gpt-3.5-turbo",
-                messages=messages,
-                stream=True)
-            role, content = spin(response, print_role=True)
-            self._messages.append({"role": "user", "content": msg})
-            self._messages.append({"role": role, "content": content})
+    dotenv.load_dotenv()
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise Exception(
+            "No API key provided. You can configure your API key by `export OPENAI_API_KEY=<API-KEY>`"
+            " or `echo OPENAI_API_KEY=<API-KEY> >> .env`.")
+    openai.api_key = api_key
 
-        def clear(self):
-            self._messages = []
+    griseo = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    griseo.add_argument('words', nargs=REMAINDER)
+    griseo.add_argument('-v', '--version', action='version', version=__version__)
+
+    args = griseo.parse_args()
 
     ctx = Context()
 
+    # oneshot
+    if len(args.words) > 0:
+        ctx.tell(' '.join(args.words))
+        return
+
+    # interactive
     commands = {
-        'c': lambda: ctx.clear(),
-        'clear': lambda: ctx.clear(),
-        'q': lambda: sys.exit(0),
-        'quit': lambda: sys.exit(0),
-        'h': lambda: print(usage),
-        'help': lambda: print(usage),
+            'c': lambda: ctx.clear(),
+            'clear': lambda: ctx.clear(),
+            'q': lambda: sys.exit(0),
+            'quit': lambda: sys.exit(0),
+            'h': lambda: print(usage),
+            'help': lambda: print(usage),
     }
 
     usage = textwrap.dedent("""
@@ -125,26 +139,3 @@ def chat():
                 print(e.user_message)
             except openai.error.InvalidRequestError as e:
                 print(e.user_message)
-
-
-def main():
-    import dotenv
-    import os
-
-    dotenv.load_dotenv()
-    api_key = os.getenv('OPENAI_API_KEY')
-    if not api_key:
-        raise Exception(
-            "No API key provided. You can configure your API key by `export OPENAI_API_KEY=<API-KEY>`"
-            " or `echo OPENAI_API_KEY=<API-KEY> >> .env`.")
-    openai.api_key = api_key
-
-    griseo = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
-    griseo.add_argument('words', nargs=REMAINDER)
-    griseo.add_argument('-v', '--version', action='version', version=__version__)
-
-    args = griseo.parse_args()
-    if len(args.words) != 0:
-        oneshot(args.words)
-    else:
-        chat()
