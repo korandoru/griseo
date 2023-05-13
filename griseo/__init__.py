@@ -19,6 +19,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, REMAINDER
 from importlib import metadata
 
 import openai
+from prompt_toolkit import PromptSession
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -123,9 +124,10 @@ def main():
     logging.basicConfig(stream=sys.stderr, format="[%(levelname)s] %(message)s")
     logger = logging.getLogger()
 
+    session = PromptSession()
     while True:
         try:
-            req = input('user << ').strip()
+            req = session.prompt('user << ').strip()
         except (EOFError, KeyboardInterrupt):
             print()
             break
