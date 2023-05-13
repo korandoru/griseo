@@ -14,7 +14,7 @@
 
 [tool.poetry]
 name = "griseo"
-version = "0.12.0"
+version = "0.13.0"
 description = "Chat with OpenAI in the Hacker way."
 authors = ["tison <wander4096@gmail.com>"]
 license = "Apache-2.0"
@@ -31,6 +31,7 @@ python = "^3.8"
 openai = "^0.27.4"
 python-dotenv = "^1.0.0"
 tenacity = "^8.2.2"
+prompt-toolkit = "^3.0.38"
 
 [tool.poetry.scripts]
 griseo = "griseo:main"
