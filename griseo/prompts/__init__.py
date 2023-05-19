@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import importlib.resources
 import json
 from pathlib import Path
+
+import importlib_resources
 
 
 def load(prompt: str):
     # 1. try bundled prompts
-    p = importlib.resources.files(__package__).joinpath(prompt)
+    p = importlib_resources.files(__package__).joinpath(prompt)
     if p.is_file():
         with p.open() as f:
             return [json.loads(line) for line in f.readlines()]
