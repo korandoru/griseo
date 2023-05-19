@@ -114,7 +114,7 @@ def main():
     }
 
     usage = textwrap.dedent("""
-    :c, :clear            reset chat context
+    :r, :reset            reset chat context
     :h, :help             show this help message
     :q, :quit             exit the conversation
     """)
