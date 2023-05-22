@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import logging
 import sys
 import textwrap
@@ -75,7 +76,7 @@ class Context:
         if file is not None:
             from griseo import prompts
             self._prompts = prompts.load(file)
-        self._messages = self._prompts
+        self._messages = copy.deepcopy(self._prompts)
 
 
 def main():
